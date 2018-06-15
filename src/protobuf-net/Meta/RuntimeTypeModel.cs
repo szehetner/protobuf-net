@@ -17,7 +17,8 @@ using System.Reflection.Emit;
 using ProtoBuf.Serializers;
 using System.Threading;
 using System.IO;
-
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace ProtoBuf.Meta
 {
@@ -388,9 +389,36 @@ namespace ProtoBuf.Meta
             UseImplicitZeroDefaults = true;
             SetOption(OPTIONS_IsDefaultModel, isDefault);
 #if FEAT_COMPILER && !FX11 && !DEBUG
-            AutoCompile = true;
+            try
+            {
+                AutoCompile = EnableAutoCompile();
+            }
+            catch { } // this is all kinds of brittle on things like UWP
 #endif
         }
+
+#if FEAT_COMPILER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static bool EnableAutoCompile()
+        {
+            try
+            {
+                var dm = new DynamicMethod("CheckCompilerAvailable", typeof(bool), new Type[] { typeof(int) });
+                var il = dm.GetILGenerator();
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldc_I4, 42);
+                il.Emit(OpCodes.Ceq);
+                il.Emit(OpCodes.Ret);
+                var func = (Predicate<int>)dm.CreateDelegate(typeof(Predicate<int>));
+                return func(42);
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return false;
+            }
+        }
+#endif
 
 #if FEAT_IKVM
         readonly IKVM.Reflection.Universe universe;
@@ -549,7 +577,7 @@ namespace ProtoBuf.Meta
 
             // check for proxy types
             Type underlyingType = ResolveProxies(type);
-            if (underlyingType != null)
+            if (underlyingType != null && underlyingType != type)
             {
                 key = types.IndexOf(MetaTypeFinder, underlyingType);
                 type = underlyingType; // if new added, make it reflect the underlying type
@@ -558,6 +586,8 @@ namespace ProtoBuf.Meta
             if (key < 0)
             {
                 int opaqueToken = 0;
+                Type origType = type;
+                bool weAdded = false;
                 try
                 {
                     TakeLock(ref opaqueToken);
@@ -580,8 +610,7 @@ namespace ProtoBuf.Meta
                         metaType = Create(type);
                     }
                     metaType.Pending = true;                    
-                    bool weAdded = false;
-
+                    
                     // double-checked
                     int winner = types.IndexOf(MetaTypeFinder, type);
                     if (winner < 0)
@@ -603,6 +632,10 @@ namespace ProtoBuf.Meta
                 finally
                 {
                     ReleaseLock(opaqueToken);
+                    if (weAdded)
+                    {
+                        ResetKeyCache(origType);
+                    }
                 }
             }
             return key;
@@ -699,6 +732,7 @@ namespace ProtoBuf.Meta
             finally
             {
                 ReleaseLock(opaqueToken);
+                ResetKeyCache(type);
             }
             
             return newType;

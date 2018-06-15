@@ -87,6 +87,13 @@ namespace protogen
                         case "--proto_path":
                             importPaths.Add(rhs);
                             break;
+                        case "--pwd":
+                            Console.WriteLine($"Current Directory: {Directory.GetCurrentDirectory()}");
+#if NETCOREAPP2_1 || NETSTANDARD2_0
+                            Console.WriteLine($"Program: {typeof(Program).Assembly.Location}");
+                            Console.WriteLine($"CodeGenerator: {typeof(CodeGenerator).Assembly.Location}");
+#endif
+                            break;
                         default:
                             if (lhs.StartsWith("-") || !string.IsNullOrWhiteSpace(rhs))
                             {
@@ -149,6 +156,9 @@ namespace protogen
                             }
                         }
                     }
+
+                    // add the library area for auto-imports (library inbuilts)
+                    set.AddImportPath(Path.GetDirectoryName(typeof(Program).Assembly.Location));
                     
                     if(inputFiles.Count == 1 && importPaths.Count == 1)
                     {
@@ -239,8 +249,16 @@ namespace protogen
             if (String.IsNullOrEmpty(fromPath)) throw new ArgumentNullException("fromPath");
             if (String.IsNullOrEmpty(toPath)) throw new ArgumentNullException("toPath");
 
-            Uri fromUri = new Uri(fromPath);
-            Uri toUri = new Uri(toPath);
+            Uri fromUri = new Uri(fromPath, UriKind.RelativeOrAbsolute);
+            if (!fromUri.IsAbsoluteUri)
+            {
+                fromUri = new Uri(Path.Combine(Directory.GetCurrentDirectory(), fromPath));
+            }
+            Uri toUri = new Uri(toPath, UriKind.RelativeOrAbsolute);
+            if (!toUri.IsAbsoluteUri)
+            {
+                toUri = new Uri(Path.Combine(Directory.GetCurrentDirectory(), toPath));
+            }
 
             if (fromUri.Scheme != toUri.Scheme) { return toPath; } // path can't be made relative.
 
@@ -285,6 +303,7 @@ Parse PROTO_FILES and generate output based on the options given:
   +langver=VERSION            Request a specific language version from the
                               selected code generator.
   +names={auto|original}      Specify naming convention rules.
+  +oneof={default|enum}       Specify whether 'oneof' should generate enums.
   +OPTION=VALUE               Specify a custom OPTION/VALUE pair for the
                               selected code generator.
   --package=PACKAGE           Add a default package (when no package is
