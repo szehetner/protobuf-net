@@ -4,79 +4,72 @@
 
 #pragma warning disable CS1591, CS0612, CS3021, IDE1006
 [global::ProtoBuf.ProtoContract()]
-public partial class Packet : global::ProtoBuf.IExtensible
+public partial class SystemConfig : global::ProtoBuf.IExtensible
 {
     private global::ProtoBuf.IExtension __pbn__extensionData;
     global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
         => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
 
-    [global::ProtoBuf.ProtoMember(1)]
-    public TypeOne One
+    [global::ProtoBuf.ProtoMember(11, Name = @"identifiers")]
+    public bool Identifiers
     {
-        get { return __pbn__Content.Is(1) ? ((TypeOne)__pbn__Content.Object) : default; }
-        set { __pbn__Content = new global::ProtoBuf.DiscriminatedUnionObject(1, value); }
+        get { return __pbn__Identifiers.GetValueOrDefault(); }
+        set { __pbn__Identifiers = value; }
     }
-    public bool ShouldSerializeOne() => __pbn__Content.Is(1);
-    public void ResetOne() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Content, 1);
+    public bool ShouldSerializeIdentifiers() => __pbn__Identifiers != null;
+    public void ResetIdentifiers() => __pbn__Identifiers = null;
+    private bool? __pbn__Identifiers;
 
-    private global::ProtoBuf.DiscriminatedUnionObject __pbn__Content;
+    [global::ProtoBuf.ProtoMember(10, Name = @"relation")]
+    public bool[] Relations { get; set; }
 
-    [global::ProtoBuf.ProtoMember(42)]
-    public TypeTwo Two
+    [global::ProtoBuf.ProtoMember(18)]
+    public bool timeConfig
     {
-        get { return __pbn__Content.Is(42) ? ((TypeTwo)__pbn__Content.Object) : default; }
-        set { __pbn__Content = new global::ProtoBuf.DiscriminatedUnionObject(42, value); }
+        get { return __pbn__timeConfig.GetValueOrDefault(); }
+        set { __pbn__timeConfig = value; }
     }
-    public bool ShouldSerializeTwo() => __pbn__Content.Is(42);
-    public void ResetTwo() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Content, 42);
+    public bool ShouldSerializetimeConfig() => __pbn__timeConfig != null;
+    public void ResettimeConfig() => __pbn__timeConfig = null;
+    private bool? __pbn__timeConfig;
 
-    [global::ProtoBuf.ProtoMember(5)]
-    public TypeOne AnotherOne
+    [global::ProtoBuf.ProtoMember(19, Name = @"mode")]
+    public bool Mode
     {
-        get { return __pbn__ContentTwo.Is(5) ? ((TypeOne)__pbn__ContentTwo.Object) : default; }
-        set { __pbn__ContentTwo = new global::ProtoBuf.DiscriminatedUnionObject(5, value); }
+        get { return __pbn__Mode.GetValueOrDefault(); }
+        set { __pbn__Mode = value; }
     }
-    public bool ShouldSerializeAnotherOne() => __pbn__ContentTwo.Is(5);
-    public void ResetAnotherOne() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__ContentTwo, 5);
+    public bool ShouldSerializeMode() => __pbn__Mode != null;
+    public void ResetMode() => __pbn__Mode = null;
+    private bool? __pbn__Mode;
 
-    private global::ProtoBuf.DiscriminatedUnionObject __pbn__ContentTwo;
-
-    [global::ProtoBuf.ProtoMember(7)]
-    public TypeTwo AnotherTwo
-    {
-        get { return __pbn__ContentTwo.Is(7) ? ((TypeTwo)__pbn__ContentTwo.Object) : default; }
-        set { __pbn__ContentTwo = new global::ProtoBuf.DiscriminatedUnionObject(7, value); }
-    }
-    public bool ShouldSerializeAnotherTwo() => __pbn__ContentTwo.Is(7);
-    public void ResetAnotherTwo() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__ContentTwo, 7);
-
-    [global::ProtoBuf.ProtoMember(6)]
-    public TypeTwo Three
-    {
-        get { return __pbn__ContentTwo.Is(6) ? ((TypeTwo)__pbn__ContentTwo.Object) : default; }
-        set { __pbn__ContentTwo = new global::ProtoBuf.DiscriminatedUnionObject(6, value); }
-    }
-    public bool ShouldSerializeThree() => __pbn__ContentTwo.Is(6);
-    public void ResetThree() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__ContentTwo, 6);
+    [global::ProtoBuf.ProtoMember(20, Name = @"connection")]
+    public bool[] Connections { get; set; }
 
 }
 
-[global::ProtoBuf.ProtoContract()]
-public partial class TypeOne : global::ProtoBuf.IExtensible
+[global::ProtoBuf.ProtoContract(Name = @"SystemConfig_e")]
+public partial class SystemConfige : global::ProtoBuf.IExtensible
 {
     private global::ProtoBuf.IExtension __pbn__extensionData;
     global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
         => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
 
-}
+    public static class Extensions
+    {
+        public static global::System.Collections.Generic.IEnumerable<global::System.DateTime> GetSystemIsOnPeripherals(SystemConfig obj)
+            => obj == null ? null : global::ProtoBuf.Extensible.GetValues<global::System.DateTime>(obj, 900001, global::ProtoBuf.DataFormat.WellKnown);
 
-[global::ProtoBuf.ProtoContract()]
-public partial class TypeTwo : global::ProtoBuf.IExtensible
-{
-    private global::ProtoBuf.IExtension __pbn__extensionData;
-    global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-        => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+        public static void AddSystemIsOnPeripherals(SystemConfig obj, global::System.DateTime value)
+            => global::ProtoBuf.Extensible.AppendValue<global::System.DateTime>(obj, 900001, global::ProtoBuf.DataFormat.WellKnown, value);
 
+        public static global::System.DateTime? GetSystemOwnedByAccount(SystemConfig obj)
+            => obj == null ? default : global::ProtoBuf.Extensible.GetValue<global::System.DateTime?>(obj, 900002, global::ProtoBuf.DataFormat.WellKnown);
+
+        public static void SetSystemOwnedByAccount(SystemConfig obj, global::System.DateTime value)
+            => global::ProtoBuf.Extensible.AppendValue<global::System.DateTime>(obj, 900002, global::ProtoBuf.DataFormat.WellKnown, value);
+
+    }
 }
 
 #pragma warning restore CS1591, CS0612, CS3021, IDE1006

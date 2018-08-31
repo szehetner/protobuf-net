@@ -115,9 +115,12 @@ namespace protogen
                 }
                 else if (version)
                 {
-                    Console.WriteLine($"protogen {GetVersion<Program>()}");
-                    Console.WriteLine($"protobuf-net {GetVersion<ProtoReader>()}");
-                    Console.WriteLine($"protobuf-net.Reflection {GetVersion<FileDescriptorSet>()}");
+                    var ver = GetVersion<Program>();
+                    Console.WriteLine($"protogen {ver}");
+                    var tmp = GetVersion<ProtoReader>();
+                    if (tmp != ver) Console.WriteLine($"protobuf-net {tmp}");
+                    tmp = GetVersion<FileDescriptorSet>();
+                    if (tmp != ver) Console.WriteLine($"protobuf-net.Reflection {tmp}");
                     return 0;
                 }
                 else if (inputFiles.Count == 0)
@@ -243,7 +246,7 @@ namespace protogen
         // with thanks to "Dave": https://stackoverflow.com/a/340454/23354
         public static String MakeRelativePath(String fromPath, String toPath)
         {
-#if NETCOREAPP2_0
+#if NETCOREAPP2_0 || NETCOREAPP2_1
             return Path.GetRelativePath(fromPath, toPath);
 #else
             if (String.IsNullOrEmpty(fromPath)) throw new ArgumentNullException("fromPath");
@@ -304,6 +307,7 @@ Parse PROTO_FILES and generate output based on the options given:
                               selected code generator.
   +names={auto|original}      Specify naming convention rules.
   +oneof={default|enum}       Specify whether 'oneof' should generate enums.
+  +listset={yes|no}           Specify whether lists should emit setters
   +OPTION=VALUE               Specify a custom OPTION/VALUE pair for the
                               selected code generator.
   --package=PACKAGE           Add a default package (when no package is

@@ -2,27 +2,70 @@
 
 Packages are available on NuGet: [protobuf-net](https://www.nuget.org/packages/protobuf-net)
 
-If you prefer to build from source:
+protobuf-net needs to be built with MSBuild, due to some of the target platforms.
 
-    git clone https://github.com/mgravell/protobuf-net.git
-    cd protobuf-net\src\protobuf-net
-    dotnet restore
-    dotnet build -c Release
+The easiest way to do this is via Visual Studio 2017 ([community edition is free](https://www.visualstudio.com/downloads/)) - build `src\protobuf-net.sln`
 
-(it will tell you where the dlls and package have been written)
+## (not yet started)
 
-Alternatively, use Visual Studio 2017 ([community edition is free](https://www.visualstudio.com/downloads/)) to build `src\protobuf-net.sln`
-
-## v3.* (not yet started)
-
-- see: [protobuf-net: large data, and the future](https://blog.marcgravell.com/2017/05/protobuf-net-large-data-and-future.html)
 - gRPC?
-
-## v2.4.0 (not yet started)
-
-- build-time tooling
+- build-time tooling from code-first
 - `dynamic` API over types known only via descriptors loaded at runtime
 - `Any` support
+
+
+## v3.0.0-alpha.3
+
+- **breaking change** (hence 3.0) if you are using `new ProtoReader(...)` - you must now use `ProtoReader.Create(...)`
+- if using `ProtoReader` you *should* now move to the `ref State` API too, although the old API will continue to
+  work with `Stream`-based readers; it **will not** work with `ReadOnlySequence<byte>` readers
+- "pipelines" (`ReadOnlySequence<byte>`) support for the **read** API (not write yet)
+- significant performance improvements in all read scenarios
+- new `CreateForAssembly(...)` API (various overloads) for working with precompiled (at runtime) type models (faster than `RuntimeTypeModel`, but less flexible)
+- significant amounts of code tidying; many yaks were shawn
+
+## v2.4.0
+
+- fix #442 - switched to 2.4.0 due to new versioning implementation breaking the assembly version; oops
+
+## v2.3.17
+
+- (#430/#431) - ensure build output from `protobuf-net.MSBuild` makes it into build output; add error codes
+- #429 - use `$IntermediateOutputPath` correctly from build tools
+
+## v2.3.16
+
+- new MSBuild .proto tools added (huge thanks go to Mark Pflug here)
+- fix error where extension GetValues might only report the last item
+- switch to git-based versioning implementation; versioning now unified over all tools
+- extensions codegen (C#): add `Get*` and `Add*` implementations for `repeated`; add `Set*` implementations for regular
+- update `protoc` to 3.6.1
+- give advance warning of possible removal of ProtoReader/ProtoWriter constructors
+- codegen (C#): implement "listset" option to control whether lists/maps get `set` accessors
+- `GetProto<T>` now emits `oneof`-style .proto syntax for inheritance
+
+## protobuf-net v2.3.15
+
+- merge #412/fix #408 - `ReadObject`/`WriteObject` failed on value types
+- merge #421 - support `IReadOnlyCollection` members
+- merge #424 - make WCF configuration features available on TFMs that support them
+- merge #396 - remove unnecessary #if defs
+
+## protogen v1.0.10
+
+- fix error in generated C# when using enums in discriminated unions (#423)
+
+## protobuf-net v2.3.14
+
+- add UAP TFM
+
+## protogen v1.0.9
+
+- fix #406 - relative and wildcard paths (`*.proto` etc) failed on `netcoreapp2.1`, impacting the "global tool"
+
+## protobuf-net v2.3.13
+
+- **IMPORTANT** fix #403 - key cache was incorrect in some cases involving multi-level inheritance; update from 2.3.8 or above is highly recommended
 
 ## protobuf-net v2.3.12
 

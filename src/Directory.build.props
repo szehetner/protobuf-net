@@ -1,14 +1,11 @@
 <Project>
   <PropertyGroup>
-    <VersionPrefix>2.3.12</VersionPrefix>
-    <ProtoGenVersion>1.0.8</ProtoGenVersion>
-    <VersionSuffix></VersionSuffix>
     <RootNamespace>ProtoBuf</RootNamespace>
     <Authors>Marc Gravell</Authors>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
     <DelaySign>False</DelaySign>
-    <AssemblyOriginatorKeyFile>../ProtoBuf.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)ProtoBuf.snk</AssemblyOriginatorKeyFile>
     <Copyright>See https://github.com/mgravell/protobuf-net</Copyright>
     <PackageLicenseUrl>https://github.com/mgravell/protobuf-net/blob/master/Licence.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/mgravell/protobuf-net</PackageProjectUrl>
@@ -25,6 +22,7 @@
     <IncludeSymbols>false</IncludeSymbols>
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
     <LangVersion>7.2</LangVersion>
+    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)Shared.ruleset</CodeAnalysisRuleset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='VS'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -32,8 +30,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="SourceLink.Create.GitHub" Version="2.8.0" PrivateAssets="All" /> 
-    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.8.0" />
-    <DotNetCliToolReference Include="dotnet-sourcelink-git" Version="2.8.0" />
+    <PackageReference Include="SourceLink.Create.GitHub" Version="2.8.3" PrivateAssets="All" /> 
+    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.8.3" />
+    <DotNetCliToolReference Include="dotnet-sourcelink-git" Version="2.8.3" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.1.65">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

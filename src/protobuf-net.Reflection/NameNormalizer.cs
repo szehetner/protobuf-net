@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-
 namespace ProtoBuf.Reflection
 {
-
+#pragma warning disable RCS1194 // Implement exception constructors.
     internal class ParserException : Exception
+#pragma warning restore RCS1194 // Implement exception constructors.
     {
         public int ColumnNumber { get; }
         public int LineNumber { get; }
@@ -15,7 +15,8 @@ namespace ProtoBuf.Reflection
         public string Text { get; }
         public string LineContents { get; }
         public bool IsError { get; }
-        internal ParserException(Token token, string message, bool isError)
+        internal ErrorCode ErrorCode { get; }
+        internal ParserException(Token token, string message, bool isError, ErrorCode errorCode)
             : base(message ?? "error")
         {
             ColumnNumber = token.ColumnNumber;
@@ -24,6 +25,7 @@ namespace ProtoBuf.Reflection
             LineContents = token.LineContents;
             Text = token.Value ?? "";
             IsError = isError;
+            ErrorCode = errorCode;
         }
     }
     /// <summary>
@@ -54,15 +56,15 @@ namespace ProtoBuf.Reflection
         {
             if (string.IsNullOrEmpty(identifier)) return identifier;
             // if all upper-case, make proper-case
-            if (Regex.IsMatch(identifier, @"^[_A-Z0-9]*$"))
+            if (Regex.IsMatch(identifier, "^[_A-Z0-9]*$"))
             {
-                return Regex.Replace(identifier, @"(^|_)([A-Z0-9])([A-Z0-9]*)",
+                return Regex.Replace(identifier, "(^|_)([A-Z0-9])([A-Z0-9]*)",
                     match => match.Groups[2].Value.ToUpperInvariant() + match.Groups[3].Value.ToLowerInvariant());
             }
             // if all lower-case, make proper case
-            if (Regex.IsMatch(identifier, @"^[_a-z0-9]*$"))
+            if (Regex.IsMatch(identifier, "^[_a-z0-9]*$"))
             {
-                return Regex.Replace(identifier, @"(^|_)([a-z0-9])([a-z0-9]*)",
+                return Regex.Replace(identifier, "(^|_)([a-z0-9])([a-z0-9]*)",
                     match => match.Groups[2].Value.ToUpperInvariant() + match.Groups[3].Value.ToLowerInvariant());
             }
             // just remove underscores - leave their chosen casing alone
@@ -227,10 +229,9 @@ namespace ProtoBuf.Reflection
             int i = 1;
             while (true)
             {
-                attempt = preferred + i.ToString();
+                attempt = preferred + (i++).ToString();
                 if (!conflicts.Contains(attempt)) return attempt;
             }
         }
     }
-
 }
