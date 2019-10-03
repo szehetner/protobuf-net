@@ -82,7 +82,7 @@ namespace Examples
         public void DeserializeNakedArray()
         {
             var arr = new Foo[0];
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             Foo[] foo = (Foo[])model.DeepClone(arr);
             Assert.Empty(foo);
         }
@@ -90,7 +90,7 @@ namespace Examples
         public void DeserializeBusyArray()
         {
             var arr = new Foo[3] { new Foo(), new Foo(), new Foo() };
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             Foo[] foo = (Foo[])model.DeepClone(arr);
             Assert.Equal(3, foo.Length);
         }
@@ -98,7 +98,7 @@ namespace Examples
         public void TestOverwriteVersusAppend()
         {
             var orig = new WithAndWithoutOverwrite { Append = new[] {7,8}, Overwrite = new[] { 9,10}};
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             model.AutoCompile = false;
             model.Add(typeof(WithAndWithoutOverwrite), true);
 
@@ -111,16 +111,34 @@ namespace Examples
             Assert.True(clone.Overwrite.SequenceEqual(new[] { 9, 10 }), "Overwrite, CompileInPlace");
             Assert.True(clone.Append.SequenceEqual(new[] { 1, 2, 3, 7, 8 }), "Append, CompileInPlace");
 
+            clone = (WithAndWithoutOverwrite)model.Compile("TestOverwriteVersusAppendTypeModel", "TestOverwriteVersusAppend.dll").DeepClone(orig);
+            Assert.True(clone.Overwrite.SequenceEqual(new[] { 9, 10 }), "Overwrite, CompileToFile");
+            Assert.True(clone.Append.SequenceEqual(new[] { 1, 2, 3, 7, 8 }), "Append, CompileToFile");
+
             clone = (WithAndWithoutOverwrite)(model.Compile()).DeepClone(orig);
             Assert.True(clone.Overwrite.SequenceEqual(new[] { 9, 10 }), "Overwrite, Compile");
             Assert.True(clone.Append.SequenceEqual(new[] { 1, 2, 3, 7, 8 }), "Append, Compile");
         }
 
         [Fact]
+        public void TestDirectSkipConstructor()
+        {
+            var obj = new SkipCtorType();
+            Assert.Equal(42, obj.Value);
+
+            obj = (SkipCtorType)BclHelpers.GetUninitializedObject(typeof(SkipCtorType));
+            Assert.Equal(0, obj.Value);
+        }
+        public class SkipCtorType
+        {
+            public int Value { get; set; } = 42;
+        }
+
+        [Fact]
         public void TestSkipConstructor()
         {
             var orig = new WithSkipConstructor { Values = new[] { 4, 5 } };
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             model.AutoCompile = false;
             model.Add(typeof(WithSkipConstructor), true);
 

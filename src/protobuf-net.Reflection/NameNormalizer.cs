@@ -49,6 +49,14 @@ namespace ProtoBuf.Reflection
             /// </summary>
             public override string Pluralize(string identifier) => AutoPluralize(identifier);
         }
+        private class NoPluralNormalizer : NameNormalizer
+        {
+            protected override string GetName(string identifier) => AutoCapitalize(identifier);
+            /// <summary>
+            /// Suggest a name with idiomatic pluralization
+            /// </summary>
+            public override string Pluralize(string identifier) => identifier;
+        }
         /// <summary>
         /// Suggest a name with idiomatic name capitalization
         /// </summary>
@@ -109,6 +117,10 @@ namespace ProtoBuf.Reflection
         /// </summary>
         public static NameNormalizer Null => new NullNormalizer(); // intentionally not reused
         /// <summary>
+        /// Name normalizer with default protobuf-net behaviour, using .NET idioms, without pluralization
+        /// </summary>
+        public static NameNormalizer NoPlural => new NoPluralNormalizer(); // intentionally not reused
+        /// <summary>
         /// Suggest a normalized identifier
         /// </summary>
         protected abstract string GetName(string identifier);
@@ -167,7 +179,7 @@ namespace ProtoBuf.Reflection
         {
             var name = definition?.Options?.GetOptions()?.Name;
             if (!string.IsNullOrWhiteSpace(name)) return name;
-            return AutoCapitalize(definition.Name);
+            return GetName(definition.Name);
         }
         /// <summary>
         /// Suggest a normalized identifier
@@ -182,6 +194,26 @@ namespace ProtoBuf.Reflection
                 preferred = Pluralize(preferred);
             }
             return GetName(definition.Parent as DescriptorProto, preferred, definition.Name, true);
+        }
+
+        /// <summary>
+        /// Suggest a normalized identifier
+        /// </summary>
+        public virtual string GetName(ServiceDescriptorProto definition)
+        {
+            var name = definition?.Options?.GetOptions()?.Name;
+            if (!string.IsNullOrWhiteSpace(name)) return name;
+            return "I" + GetName(definition.Name); // .NET convention
+        }
+
+        /// <summary>
+        /// Suggest a normalized identifier
+        /// </summary>
+        public virtual string GetName(MethodDescriptorProto definition)
+        {
+            var name = definition?.Options?.GetOptions()?.Name;
+            if (!string.IsNullOrWhiteSpace(name)) return name;
+            return GetName(definition.Name);
         }
 
         internal bool IsCaseSensitive { get; set; }

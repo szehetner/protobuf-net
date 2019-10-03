@@ -1,5 +1,4 @@
-﻿#if FEAT_SERVICEMODEL && PLAT_XMLSERIALIZER
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -57,7 +56,7 @@ namespace ProtoBuf.ServiceModel
             if (key < 0) throw new ArgumentOutOfRangeException(nameof(type), "Type not recognised by the model: " + type.FullName);
         }
 
-        static int GetKey(TypeModel model, ref Type type, out bool isList)
+        private static int GetKey(TypeModel model, ref Type type, out bool isList)
         {
             if (model != null && type != null)
             {
@@ -67,7 +66,7 @@ namespace ProtoBuf.ServiceModel
                     isList = false;
                     return key;
                 }
-                Type itemType = TypeModel.GetListItemType(model, type);
+                Type itemType = TypeModel.GetListItemType(type);
                 if (itemType != null)
                 {
                     key = model.GetKey(ref itemType);
@@ -123,9 +122,10 @@ namespace ProtoBuf.ServiceModel
                     }
                     else
                     {
-                        using (ProtoWriter protoWriter = ProtoWriter.Create(ms, model, null))
+                        using (ProtoWriter protoWriter = ProtoWriter.Create(out var state, ms, model, null))
                         {
-                            model.Serialize(key, graph, protoWriter);
+                            model.Serialize(protoWriter, ref state, key, graph);
+                            protoWriter.Close(ref state);
                         }
                     }
                     byte[] buffer = ms.GetBuffer();
@@ -169,12 +169,12 @@ namespace ProtoBuf.ServiceModel
                 ProtoReader protoReader = null;
                 try
                 {
-                    protoReader = ProtoReader.Create(Stream.Null, model, null, ProtoReader.TO_EOF);
-                    return model.Deserialize(key, null, protoReader);
+                    protoReader = ProtoReader.Create(out var state, Stream.Null, model, null, ProtoReader.TO_EOF);
+                    return model.DeserializeCore(protoReader, ref state, key, null);
                 }
                 finally
                 {
-                    ProtoReader.Recycle(protoReader);
+                    protoReader?.Recycle();
                 }
             }
 
@@ -191,12 +191,12 @@ namespace ProtoBuf.ServiceModel
                     ProtoReader protoReader = null;
                     try
                     {
-                        protoReader = ProtoReader.Create(ms, model, null, ProtoReader.TO_EOF);
-                        result = model.Deserialize(key, null, protoReader);
+                        protoReader = ProtoReader.Create(out var state, ms, model, null, ProtoReader.TO_EOF);
+                        result = model.DeserializeCore(protoReader, ref state, key, null);
                     }
                     finally
                     {
-                        ProtoReader.Recycle(protoReader);
+                        protoReader?.Recycle();
                     }
                 }
             }
@@ -205,4 +205,3 @@ namespace ProtoBuf.ServiceModel
         }
     }
 }
-#endif

@@ -35,7 +35,7 @@ namespace Examples
             var inner = new BasicReferenceTestInner();
             outer.Foo = outer.Bar = inner;
 
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             model.Add(typeof(BasicReferenceTestOuter), true);
             model.Add(typeof(BasicReferenceTestInner), true);
 
@@ -70,7 +70,7 @@ namespace Examples
             inner.Self = inner;
             outer.Foo = inner;
 
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             model.Add(typeof(BasicReferenceTestOuter), true);
             model.Add(typeof(BasicReferenceTestInner), true);
 
@@ -115,11 +115,28 @@ namespace Examples
         }
 
         [Fact]
-        public void StringInterned()
+        public void StringNotInterned()
         {
+            var model = RuntimeTypeModel.Create();
+            model.InternStrings = false;
+
             var obj = new StringInternedType { Foo = GetString(), Bar = GetString() };
             Assert.False(ReferenceEquals(obj.Foo, obj.Bar));
-            var clone = Serializer.DeepClone(obj);
+            var clone = (StringInternedType)model.DeepClone(obj);
+            Assert.Equal(obj.Foo, clone.Foo);
+            Assert.Equal(obj.Bar, clone.Bar);
+            Assert.False(ReferenceEquals(clone.Foo, clone.Bar));
+        }
+
+        [Fact]
+        public void StringInterned()
+        {
+            var model = RuntimeTypeModel.Create();
+            model.InternStrings = true;
+
+            var obj = new StringInternedType { Foo = GetString(), Bar = GetString() };
+            Assert.False(ReferenceEquals(obj.Foo, obj.Bar));
+            var clone = (StringInternedType)model.DeepClone(obj);
             Assert.Equal(obj.Foo, clone.Foo);
             Assert.Equal(obj.Bar, clone.Bar);
             Assert.True(ReferenceEquals(clone.Foo, clone.Bar));
@@ -174,7 +191,7 @@ namespace Examples
             var inner = new BasicDynamicTestInner();
             outer.Foo = inner;
 
-            var model = TypeModel.Create();
+            var model = RuntimeTypeModel.Create();
             model.Add(typeof(BasicDynamicTestOuter), true);
             model.Add(typeof(BasicDynamicTestInner), true); // assume we can at least know candidates at runtime, for now
 
